@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Send, Users, FileText, Type } from 'lucide-react'
+import { Send, Users, FileText, Type, Mail, ArrowUpRight } from 'lucide-react'
 
 export default function DashboardPage() {
   const [campaignName, setCampaignName] = useState('')
@@ -27,13 +27,48 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-6">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-foreground">FreeMail Sender</h1>
-        <p className="text-muted-foreground mt-2">Create your campaign, paste emails, and send instantly.</p>
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6">
+      
+      {/* Overview Stats */}
+      <div className="mb-10">
+        <h1 className="text-2xl font-bold text-foreground mb-4">Dashboard Overview</h1>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground">Total Audiences</h3>
+                <span className="text-3xl font-bold text-foreground mt-2 block">14,248</span>
+              </div>
+              <div className="p-3 rounded-lg bg-blue-50 text-blue-500"><Users className="w-5 h-5" /></div>
+            </div>
+          </div>
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground">Emails Sent</h3>
+                <span className="text-3xl font-bold text-foreground mt-2 block">82,420</span>
+              </div>
+              <div className="p-3 rounded-lg bg-indigo-50 text-indigo-500"><Mail className="w-5 h-5" /></div>
+            </div>
+          </div>
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground">Avg. Open Rate</h3>
+                <span className="text-3xl font-bold text-foreground mt-2 block">28.4%</span>
+              </div>
+              <div className="p-3 rounded-lg bg-success/10 text-success"><ArrowUpRight className="w-5 h-5" /></div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl shadow-sm p-8 space-y-6">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-foreground">Send New Campaign</h2>
+        <p className="text-muted-foreground text-sm mt-1">Create your campaign, paste emails, and send instantly.</p>
+      </div>
+
+      <div className="bg-card border border-border rounded-xl shadow-sm p-6 sm:p-8 space-y-6">
         
         {/* Campaign Name */}
         <div>
