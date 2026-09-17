@@ -52,6 +52,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
+import { GlobalLoader } from '@/components/shared/global-loader'
+
 export default function RootLayout({
   children,
 }: {
@@ -60,7 +62,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <GlobalLoader>{children}</GlobalLoader>
+        </Providers>
       </body>
     </html>
   )

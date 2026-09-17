@@ -1,54 +1,48 @@
-@import "tailwindcss";
-
-/* ─── FreeMail Design System ─────────────────────────── */
-
-@theme {
-  /* Typography */
-  --font-sans: var(--font-poppins), 'Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif;
-
-  /* Light Theme Colors */
-  --color-background: #F8FAFC;
-  --color-foreground: #111827;
-  --color-card: #FFFFFF;
-  --color-card-foreground: #111827;
-  --color-popover: #FFFFFF;
-  --color-popover-foreground: #111827;
-  --color-primary: #4F46E5;
-  --color-primary-foreground: #FFFFFF;
-  --color-primary-hover: #4338CA;
-  --color-secondary: #F1F5F9;
-  --color-secondary-foreground: #1E293B;
-  --color-muted: #F1F5F9;
-  --color-muted-foreground: #6B7280;
-  --color-accent: #F1F5F9;
-  --color-accent-foreground: #1E293B;
-  --color-destructive: #DC2626;
-  --color-destructive-foreground: #FFFFFF;
-  --color-success: #16A34A;
-  --color-success-foreground: #FFFFFF;
-  --color-warning: #F59E0B;
-  --color-warning-foreground: #FFFFFF;
-  --color-border: #E5E7EB;
-  --color-input: #E5E7EB;
-  --color-ring: #4F46E5;
-
-  /* Radius */
-  --radius: 0.75rem;
-  --radius-sm: 0.5rem;
-  --radius-lg: 1rem;
-
-  /* Sidebar */
-  --color-sidebar: #FFFFFF;
-  --color-sidebar-foreground: #374151;
-  --color-sidebar-border: #F1F5F9;
-  --color-sidebar-active: #EEF2FF;
-  --color-sidebar-active-foreground: #4F46E5;
-  --color-sidebar-hover: #F8FAFC;
-}
-
-/* ─── Dark Mode ──────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
+  :root {
+    --font-sans: var(--font-poppins), 'Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+    --color-background: #F8FAFC;
+    --color-foreground: #111827;
+    --color-card: #FFFFFF;
+    --color-card-foreground: #111827;
+    --color-popover: #FFFFFF;
+    --color-popover-foreground: #111827;
+    --color-primary: #4F46E5;
+    --color-primary-foreground: #FFFFFF;
+    --color-primary-hover: #4338CA;
+    --color-secondary: #F1F5F9;
+    --color-secondary-foreground: #1E293B;
+    --color-muted: #F1F5F9;
+    --color-muted-foreground: #6B7280;
+    --color-accent: #F1F5F9;
+    --color-accent-foreground: #1E293B;
+    --color-destructive: #DC2626;
+    --color-destructive-foreground: #FFFFFF;
+    --color-success: #16A34A;
+    --color-success-foreground: #FFFFFF;
+    --color-warning: #F59E0B;
+    --color-warning-foreground: #FFFFFF;
+    --color-border: #E5E7EB;
+    --color-input: #E5E7EB;
+    --color-ring: #4F46E5;
+
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
+
+    --color-sidebar: #FFFFFF;
+    --color-sidebar-foreground: #374151;
+    --color-sidebar-border: #E5E7EB;
+    --color-sidebar-active: #EEF2FF;
+    --color-sidebar-active-foreground: #4F46E5;
+    --color-sidebar-hover: #F8FAFC;
+  }
+
   .dark {
     --color-background: #22242A;
     --color-foreground: #F1F5F9;
@@ -84,76 +78,23 @@
   }
 }
 
-/* ─── Base Styles ────────────────────────────────────── */
-
-* {
-  border-color: var(--color-border);
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+  }
 }
-
-body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Headings default to SemiBold 600 */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-}
-
-/* ─── Scrollbar ──────────────────────────────────────── */
-
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted-foreground);
-}
-
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
-}
-
-/* ─── Focus Ring ─────────────────────────────────────── */
-
-*:focus-visible {
-  outline: 2px solid var(--color-ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-/* ─── Selection ──────────────────────────────────────── */
-
-::selection {
-  background-color: var(--color-primary);
-  color: white;
-}
-
-/* ─── Utilities ──────────────────────────────────────── */
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
   .animate-in {
-    animation: fadeIn 0.2s ease-out;
+    animation: fadeIn 0.2s ease-out forwards;
   }
 
   @keyframes fadeIn {
@@ -166,36 +107,23 @@ h1, h2, h3, h4, h5, h6 {
       transform: translateY(0);
     }
   }
+}
 
-  .slide-in-right {
-    animation: slideInRight 0.2s ease-out;
-  }
-
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  /* Skeleton shimmer animation */
-  .skeleton-shimmer {
-    background: linear-gradient(
-      90deg,
-      var(--color-muted) 0%,
-      var(--color-secondary) 50%,
-      var(--color-muted) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-foreground);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }
