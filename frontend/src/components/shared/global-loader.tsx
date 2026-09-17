@@ -18,13 +18,12 @@ export function GlobalLoader({ children }: { children: React.ReactNode }) {
     return (
       <div className="fixed inset-0 bg-[#222527] z-50 flex items-center justify-center flex-col font-sans">
         <Image 
-          src="/loading.gif" 
+          src="/loading_transparent.gif" 
           alt="Loading FreeMail..." 
           width={400} 
           height={300}
           unoptimized
           priority
-          className="mix-blend-screen"
         />
         <h2 className="text-white font-semibold text-xl mt-4 tracking-wider animate-pulse">Loading FreeMail...</h2>
       </div>
