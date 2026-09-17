@@ -16,7 +16,7 @@ export function GlobalLoader({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-[#22242A] z-50 flex items-center justify-center flex-col">
+      <div className="fixed inset-0 bg-[#222527] z-50 flex items-center justify-center flex-col font-sans">
         <Image 
           src="/loading.gif" 
           alt="Loading FreeMail..." 
