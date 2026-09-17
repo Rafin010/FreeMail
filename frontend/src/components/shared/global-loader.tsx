@@ -24,6 +24,7 @@ export function GlobalLoader({ children }: { children: React.ReactNode }) {
           height={300}
           unoptimized
           priority
+          className="mix-blend-screen"
         />
         <h2 className="text-white font-semibold text-xl mt-4 tracking-wider animate-pulse">Loading FreeMail...</h2>
       </div>
