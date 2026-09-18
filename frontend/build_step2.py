@@ -1,8 +1,11 @@
-'use client'
+# -*- coding: utf-8 -*-
+import os
+
+page_content = r''''use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { CheckCircle2, ChevronRight, Mail, Upload, X, Trash2, ShieldAlert, ShieldCheck, FileText, Image as ImageIcon, FileArchive, FileSpreadsheet, File as FileIcon, Palette, Link2 } from 'lucide-react'
+import { CheckCircle2, ChevronRight, Mail, Upload, X, Trash2, ShieldAlert, ShieldCheck } from 'lucide-react'
 import RichTextEditor from '@/components/shared/rich-text-editor'
 import { useCampaignStore } from '@/store/campaign-store'
 
@@ -14,16 +17,6 @@ const TEMPLATES = [
 ]
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-const getFileIcon = (filename: string, type: string) => {
-  const ext = filename.split('.').pop()?.toLowerCase() || '';
-  if (type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) return <ImageIcon className="w-5 h-5 text-blue-500" />;
-  if (['pdf'].includes(ext)) return <FileText className="w-5 h-5 text-red-500" />;
-  if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) return <FileArchive className="w-5 h-5 text-yellow-600" />;
-  if (['xls', 'xlsx', 'csv'].includes(ext)) return <FileSpreadsheet className="w-5 h-5 text-emerald-600" />;
-  if (['doc', 'docx', 'txt'].includes(ext)) return <FileText className="w-5 h-5 text-blue-600" />;
-  return <FileIcon className="w-5 h-5 text-zinc-500" />;
-}
 
 export default function CampaignEditWizard() {
   const params = useParams()
@@ -43,13 +36,12 @@ export default function CampaignEditWizard() {
   const [theme, setTheme] = useState(campaign?.theme || 'professional')
   const [companyName, setCompanyName] = useState(campaign?.companyName || 'FreeMail Co.')
   const [companyAddress, setCompanyAddress] = useState(campaign?.companyAddress || '123 Business Avenue, Tech City, 10001')
-  const [copyrightText, setCopyrightText] = useState(campaign?.copyrightText || '© 2026 FreeMail Inc. All rights reserved.')
+  const [copyrightText, setCopyrightText] = useState(campaign?.copyrightText || '&copy; 2026 FreeMail Inc. All rights reserved.')
   const [unsubscribeText, setUnsubscribeText] = useState(campaign?.unsubscribeText || 'Unsubscribe from this list')
   
-  // New Styling Fields
-  const [headerBgColor, setHeaderBgColor] = useState(campaign?.headerBgColor || '#ffffff')
-  const [bodyBgColor, setBodyBgColor] = useState(campaign?.bodyBgColor || '#f4f4f5')
-  const [logoUrl, setLogoUrl] = useState(campaign?.logoUrl || '')
+  // New Layout Fields
+  const [headerBgColor, setHeaderBgColor] = useState('#ffffff')
+  const [logoUrl, setLogoUrl] = useState('')
 
   // Audience State
   const [emails, setEmails] = useState<string[]>((campaign?.rawEmails || '').split('\n').filter(Boolean))
@@ -59,14 +51,8 @@ export default function CampaignEditWizard() {
   
   // Attachments State
   const [attachments, setAttachments] = useState<{name: string, size: number, type: string, url: string}[]>(campaign?.attachments || [])
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const logoInputRef = useRef<HTMLInputElement>(null)
 
   // Auto-save on unmount or step change
   useEffect(() => {
@@ -75,10 +61,10 @@ export default function CampaignEditWizard() {
         subjectLine, messageBody, buttonText, buttonUrl, theme,
         companyName, companyAddress, copyrightText, unsubscribeText,
         rawEmails: emails.join('\n'),
-        attachments, headerBgColor, bodyBgColor, logoUrl
+        attachments
       })
     }
-  }, [id, subjectLine, messageBody, buttonText, buttonUrl, theme, companyName, companyAddress, copyrightText, unsubscribeText, emails, attachments, headerBgColor, bodyBgColor, logoUrl, updateCampaign])
+  }, [id, subjectLine, messageBody, buttonText, buttonUrl, theme, companyName, companyAddress, copyrightText, unsubscribeText, emails, attachments, updateCampaign])
 
   const showError = (msg: string) => {
     setErrorToast(msg)
@@ -107,9 +93,9 @@ export default function CampaignEditWizard() {
       })
       
       if (duplicates > 0 && added === 0) {
-        showError(`${duplicates} duplicate emails ignored!`)
+        showError(${duplicates} duplicate emails ignored!)
       } else if (duplicates > 0) {
-        showError(`Added ${added} emails. Ignored ${duplicates} duplicates.`)
+        showError(Added  emails. Ignored  duplicates.)
       }
       
       return nextList
@@ -139,27 +125,11 @@ export default function CampaignEditWizard() {
     const reader = new FileReader()
     reader.onload = (event) => {
       const text = event.target?.result as string
-      // Extract only valid emails using Regex
-      const extracted = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || []
-      if (extracted.length === 0) {
-        showError('No valid emails found in the file.')
-      } else {
-        handleAddEmails(extracted)
-      }
+      const extracted = text.split(/[\n\r,;]+/)
+      handleAddEmails(extracted)
     }
     reader.readAsText(file)
     if (fileInputRef.current) fileInputRef.current.value = ''
-  }
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      setLogoUrl(event.target?.result as string)
-    }
-    reader.readAsDataURL(file)
-    if (logoInputRef.current) logoInputRef.current.value = ''
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -180,18 +150,15 @@ export default function CampaignEditWizard() {
     const reader = new FileReader()
     reader.onload = (event) => {
       const text = event.target?.result as string
-      const extracted = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || []
-      if (extracted.length === 0) {
-        showError('No valid emails found in the file.')
-      } else {
-        handleAddEmails(extracted)
-      }
+      const extracted = text.split(/[\n\r,;]+/)
+      handleAddEmails(extracted)
     }
     reader.readAsText(file)
   }
 
-  if (!mounted) return null
-  if (!campaign) return <div className="p-8 text-center text-muted-foreground">Campaign not found</div>
+  if (!campaign) {
+    return <div className="p-8 text-center">Campaign not found!</div>
+  }
 
   const validCount = emails.filter(e => EMAIL_REGEX.test(e)).length
   const invalidCount = emails.length - validCount
@@ -215,12 +182,8 @@ export default function CampaignEditWizard() {
             { num: 3, label: 'Review & Run' }
           ].map((s, i) => (
             <React.Fragment key={s.num}>
-              <div className={`flex items-center gap-3 transition-opacity ${step >= s.num ? 'opacity-100' : 'opacity-40'}`}>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step > s.num ? 'bg-primary text-primary-foreground' :
-                  step === s.num ? 'bg-foreground text-background shadow-md' : 
-                  'bg-background border border-border'
-                }`}>
+              <div className={lex items-center gap-3 transition-opacity }>
+                <div className={w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold }>
                   {step > s.num ? <CheckCircle2 className="w-4 h-4" /> : s.num}
                 </div>
                 <span className="text-sm font-semibold hidden sm:block">{s.label}</span>
@@ -241,13 +204,7 @@ export default function CampaignEditWizard() {
               Next Step
             </button>
           ) : (
-            <button 
-              onClick={() => {
-                updateCampaign(id, { status: 'Sent' })
-                router.push(`/campaigns/${id}/monitor`)
-              }}
-              className="px-6 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:bg-primary-hover transition-opacity shadow-lg animate-pulse"
-            >
+            <button className="px-6 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:bg-primary-hover transition-opacity shadow-lg animate-pulse">
               Launch Campaign
             </button>
           )}
@@ -274,95 +231,18 @@ export default function CampaignEditWizard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-2">Theme Base</label>
+                    <label className="block text-sm font-semibold mb-2">Theme</label>
                     <div className="flex bg-muted p-1 rounded-md border border-input">
                       {['minimal', 'professional', 'dark'].map(t => (
                         <button 
                           key={t}
                           onClick={() => setTheme(t as any)}
-                          className={`flex-1 text-xs font-bold py-1.5 rounded ${theme === t ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                          className={lex-1 text-xs font-bold py-1.5 rounded }
                         >
                           {t.charAt(0).toUpperCase() + t.slice(1)}
                         </button>
                       ))}
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Advanced Header & Colors */}
-              <div className="bg-card border border-border p-5 rounded-xl shadow-sm space-y-4">
-                <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <Palette className="w-4 h-4" /> Header & Colors
-                </h2>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-muted-foreground">Header Background Color</label>
-                    <div className="flex gap-2 items-center">
-                      <input 
-                        type="color" 
-                        value={headerBgColor}
-                        onChange={e => setHeaderBgColor(e.target.value)}
-                        className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                      />
-                      <input 
-                        type="text" 
-                        value={headerBgColor}
-                        onChange={e => setHeaderBgColor(e.target.value)}
-                        className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-muted-foreground">Email Background Color</label>
-                    <div className="flex gap-2 items-center">
-                      <input 
-                        type="color" 
-                        value={bodyBgColor}
-                        onChange={e => setBodyBgColor(e.target.value)}
-                        className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                      />
-                      <input 
-                        type="text" 
-                        value={bodyBgColor}
-                        onChange={e => setBodyBgColor(e.target.value)}
-                        className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <label className="block text-xs font-semibold text-muted-foreground mb-2">Logo (URL or Upload)</label>
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Link2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input 
-                        type="text" 
-                        value={logoUrl}
-                        onChange={e => setLogoUrl(e.target.value)}
-                        placeholder="https://example.com/logo.png"
-                        className="w-full h-9 pl-9 pr-3 text-sm bg-background border border-input rounded-md focus:ring-1 focus:ring-primary"
-                      />
-                    </div>
-                    <span className="text-xs font-bold text-muted-foreground uppercase">OR</span>
-                    <input type="file" accept="image/*" ref={logoInputRef} onChange={handleLogoUpload} className="sr-only" />
-                    <button 
-                      onClick={() => logoInputRef.current?.click()}
-                      className="h-9 px-4 bg-secondary hover:bg-muted text-foreground text-xs font-bold rounded-md border border-border flex items-center gap-2"
-                    >
-                      <Upload className="w-3.5 h-3.5" /> Upload
-                    </button>
-                    {logoUrl && (
-                      <button 
-                        onClick={() => setLogoUrl('')}
-                        className="h-9 px-3 text-destructive hover:bg-destructive/10 rounded-md border border-transparent hover:border-destructive/20"
-                        title="Clear Logo"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -378,8 +258,8 @@ export default function CampaignEditWizard() {
                 />
               </div>
               
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-3">
                   <label className="block text-sm font-semibold">Message Body</label>
                   <div className="flex gap-2">
                     {TEMPLATES.map(t => (
@@ -401,22 +281,21 @@ export default function CampaignEditWizard() {
                 
                 {/* Professional Attachment Box Render */}
                 {attachments.length > 0 && (
-                  <div className="p-4 bg-card border border-border rounded-xl shadow-sm">
-                    <label className="block text-xs font-bold text-foreground uppercase tracking-wider mb-3">Attachments ({attachments.length})</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="mt-4 space-y-2">
+                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">Attachments ({attachments.length})</label>
+                    <div className="grid grid-cols-2 gap-3">
                       {attachments.map((file, i) => (
-                        <div key={i} className="flex items-center gap-3 p-3 bg-background hover:bg-muted/30 border border-border rounded-lg relative group transition-colors">
-                          <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center shrink-0">
-                            {getFileIcon(file.name, file.type)}
+                        <div key={i} className="flex items-center gap-3 p-3 bg-muted/40 border border-border rounded-lg relative group">
+                          <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center shrink-0">
+                            <Upload className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold truncate text-foreground pr-6" title={file.name}>{file.name}</p>
-                            <p className="text-xs text-muted-foreground font-medium">{(file.size / 1024).toFixed(1)} KB</p>
+                            <p className="text-sm font-semibold truncate text-foreground">{file.name}</p>
+                            <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
                           </div>
                           <button 
                             onClick={() => setAttachments(prev => prev.filter((_, index) => index !== i))}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 bg-background hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-md opacity-0 group-hover:opacity-100 transition-all shadow-sm border border-border"
-                            title="Remove attachment"
+                            className="absolute right-2 top-2 p-1.5 bg-background/80 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-md opacity-0 group-hover:opacity-100 transition-all shadow-sm border border-border"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -450,59 +329,12 @@ export default function CampaignEditWizard() {
                 </div>
               </div>
 
-              <div className="pt-8 border-t border-border space-y-4">
-                <h3 className="text-sm font-bold">Email Footer Elements</h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Company Name</label>
-                    <input 
-                      type="text" 
-                      className="w-full h-9 px-3 bg-background border border-input rounded-md text-sm"
-                      value={companyName}
-                      onChange={e => setCompanyName(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Company Address</label>
-                    <input 
-                      type="text" 
-                      className="w-full h-9 px-3 bg-background border border-input rounded-md text-sm"
-                      value={companyAddress}
-                      onChange={e => setCompanyAddress(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Copyright Text</label>
-                    <input 
-                      type="text" 
-                      className="w-full h-9 px-3 bg-background border border-input rounded-md text-sm"
-                      value={copyrightText}
-                      onChange={e => setCopyrightText(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Unsubscribe Text</label>
-                    <input 
-                      type="text" 
-                      className="w-full h-9 px-3 bg-background border border-input rounded-md text-sm"
-                      value={unsubscribeText}
-                      onChange={e => setUnsubscribeText(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
             </div>
 
             {/* Right Panel: Live Preview */}
             <div className="w-full lg:w-1/2 h-full bg-zinc-950 p-4 sm:p-8 flex items-center justify-center overflow-y-auto">
                <div className="w-full max-w-2xl bg-zinc-900 rounded-xl border border-zinc-800 shadow-2xl overflow-hidden flex flex-col max-h-full">
                  
-                 {/* Browser Mockup Top Bar */}
                  <div className="h-10 bg-zinc-950 border-b border-zinc-800 flex items-center px-4 gap-2 shrink-0">
                    <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
                    <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
@@ -510,17 +342,12 @@ export default function CampaignEditWizard() {
                    <div className="ml-4 text-xs font-medium text-zinc-500 flex-1 text-center pr-10">Live Preview</div>
                  </div>
 
-                 {/* Simulated Email Client Viewport */}
-                 <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar" style={{ backgroundColor: bodyBgColor }}>
-                   <div className={`w-full max-w-lg mx-auto rounded-lg shadow-sm overflow-hidden border ${
-                     theme==='dark' ? 'bg-black border-zinc-800 text-white' : 
-                     theme==='minimal' ? 'bg-white border-gray-100 text-gray-900' : 
-                     'bg-white border-gray-200 text-gray-900'}
-                   `}>
-                      {/* Email Header */}
-                      <div className={`h-16 flex items-center px-6`} style={{ backgroundColor: headerBgColor }}>
+                 <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
+                   <div className={w-full max-w-lg mx-auto rounded-lg shadow-sm overflow-hidden border 
+                   }>
+                      <div className={h-16 flex items-center px-6} style={{ backgroundColor: headerBgColor }}>
                         {logoUrl ? (
-                          <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-full object-cover shadow-sm border border-border/20" />
+                          <img src={logoUrl} alt="Logo" className="max-h-8 object-contain" />
                         ) : (
                           <>
                             <div className="w-8 h-8 rounded-md bg-zinc-900 text-white flex items-center justify-center font-bold text-sm shadow-sm">
@@ -533,7 +360,6 @@ export default function CampaignEditWizard() {
                         )}
                       </div>
 
-                      {/* Email Body */}
                       <div className="p-8">
                         {subjectLine && <h1 className="text-2xl font-bold mb-6 opacity-90">{subjectLine}</h1>}
                         {!subjectLine && <h1 className="text-2xl font-bold mb-6 opacity-20">Your Subject Line Will Appear Here</h1>}
@@ -546,39 +372,36 @@ export default function CampaignEditWizard() {
                         {/* Live Preview Attachment Boxes */}
                         {attachments.length > 0 && (
                           <div className="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-800">
-                            <p className="text-xs font-bold uppercase tracking-wider mb-3 opacity-50">Attachments</p>
                             <div className="flex flex-wrap gap-3">
                               {attachments.map((file, i) => (
-                                <a key={i} href={file.url} download={file.name} className={`flex items-center gap-3 p-3 rounded-lg border ${theme==='dark'?'border-zinc-800 bg-zinc-900 hover:bg-zinc-800':'border-gray-200 bg-gray-50 hover:bg-gray-100'} shadow-sm max-w-xs transition-colors cursor-pointer group`}>
-                                  <div className={`w-10 h-10 ${theme==='dark'?'bg-zinc-950':'bg-white'} rounded-md flex items-center justify-center shrink-0 border ${theme==='dark'?'border-zinc-800':'border-gray-200'}`}>
-                                    {getFileIcon(file.name, file.type)}
+                                <div key={i} className={lex items-center gap-3 p-3 rounded-lg border  shadow-sm max-w-xs}>
+                                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-md flex items-center justify-center shrink-0">
+                                    <Upload className="w-5 h-5" />
                                   </div>
-                                  <div className="flex-1 min-w-0 pr-2">
-                                    <p className={`text-sm font-semibold truncate ${theme==='dark'?'text-white':'text-gray-900'} group-hover:underline`}>{file.name}</p>
+                                  <div className="flex-1 min-w-0 pr-4">
+                                    <p className={	ext-sm font-semibold truncate }>{file.name}</p>
                                     <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
                                   </div>
-                                </a>
+                                </div>
                               ))}
                             </div>
                           </div>
                         )}
                         
-                        {/* CTA Button */}
                         {buttonText && (
                           <div className="mt-8">
-                            <a href={buttonUrl || "#"} className={`inline-block px-6 py-2.5 ${theme==='dark'?'bg-white text-black':'bg-black text-white'} font-medium text-sm rounded-md transition-transform hover:-translate-y-0.5 shadow-sm`}>
+                            <a href="#" className={inline-block px-6 py-2.5  font-medium text-sm rounded-md transition-transform hover:-translate-y-0.5 shadow-sm}>
                               {buttonText}
                             </a>
                           </div>
                         )}
                       </div>
 
-                      {/* Email Footer */}
-                      <div className={`p-6 text-center ${theme==='dark' ? 'bg-zinc-950 border-t border-zinc-900' : 'bg-zinc-50 border-t border-gray-100'}`}>
+                      <div className={p-6 text-center }>
                          {theme === 'professional' && <div className="mt-4" />}
                          <p className="text-[10px] text-zinc-500 mb-1" dangerouslySetInnerHTML={{ __html: copyrightText }}></p>
                          <p className="text-[10px] text-zinc-500">{companyAddress}</p>
-                         <a href="#" className="text-[10px] text-zinc-500 mt-4 inline-block underline hover:text-zinc-400">{unsubscribeText}</a>
+                         <p className="text-[10px] text-zinc-500 mt-4 cursor-pointer underline hover:text-zinc-400">{unsubscribeText}</p>
                       </div>
 
                    </div>
@@ -590,47 +413,54 @@ export default function CampaignEditWizard() {
 
         {step === 2 && (
           <div className="absolute inset-0 flex p-6 bg-background overflow-y-auto">
-             <div className="w-full max-w-5xl mx-auto space-y-6">
+             <div className="w-full max-w-4xl mx-auto space-y-6">
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* 1. Drag and Drop Box */}
-                  <div className="bg-card border border-border rounded-xl shadow-sm p-6 flex flex-col h-full">
-                    <h2 className="text-lg font-bold text-foreground mb-4">Upload Recipient List (CSV/TXT)</h2>
-                    <div 
-                      className={`flex-1 border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer flex flex-col items-center justify-center ${isDragging ? 'border-primary bg-primary/5' : 'border-border bg-muted/20 hover:bg-muted/40'}`}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className={`w-10 h-10 mb-4 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <p className="text-base font-semibold text-foreground">Drag and drop your file here</p>
-                      <p className="text-sm text-muted-foreground mt-2">Supports .csv and .txt files</p>
-                    </div>
-                    <input type="file" accept=".txt,.csv" ref={fileInputRef} onChange={handleFileUpload} className="sr-only" />
+                {/* 1. Drag and Drop Box */}
+                <div className="bg-card border border-border rounded-xl shadow-sm p-6">
+                  <h2 className="text-lg font-bold text-foreground mb-4">Upload Recipient List (CSV/TXT)</h2>
+                  <div 
+                    className={order-2 border-dashed rounded-xl p-10 text-center transition-colors cursor-pointer flex flex-col items-center justify-center }
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className={w-10 h-10 mb-4 } />
+                    <p className="text-base font-semibold text-foreground">Drag and drop your file here, or click to browse</p>
+                    <p className="text-sm text-muted-foreground mt-2">Supports .csv and .txt with comma or newline separated emails</p>
                   </div>
+                  <input type="file" accept=".txt,.csv" ref={fileInputRef} onChange={handleFileUpload} className="sr-only" />
+                </div>
 
-                  {/* 2. Manual Text Area */}
-                  <div className="bg-card border border-border rounded-xl shadow-sm p-6 flex flex-col h-full">
-                    <h2 className="text-lg font-bold text-foreground mb-4">Manually Enter Emails</h2>
-                    <textarea 
-                      className="flex-1 w-full p-4 bg-muted/20 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary shadow-sm text-sm font-mono placeholder:text-muted-foreground/50 resize-none"
-                      placeholder="Paste emails here (separated by commas or newlines)..."
-                      value={emailInput}
-                      onChange={e => setEmailInput(e.target.value)}
-                      onKeyDown={handleEmailInputKeyDown}
-                    ></textarea>
-                    <div className="mt-4 flex justify-end">
-                      <button 
-                        onClick={() => {
-                          handleAddEmails(emailInput.split(/[\s,]+/));
-                          setEmailInput('');
-                        }}
-                        className="px-6 py-2.5 bg-foreground text-background text-sm font-bold rounded-md hover:opacity-90 transition-opacity w-full sm:w-auto shadow-sm"
-                      >
-                        Add to List
-                      </button>
-                    </div>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-background px-3 text-muted-foreground font-bold uppercase tracking-widest">Or</span>
+                  </div>
+                </div>
+
+                {/* 2. Manual Text Area */}
+                <div className="bg-card border border-border rounded-xl shadow-sm p-6">
+                  <h2 className="text-lg font-bold text-foreground mb-4">Manually Enter Emails</h2>
+                  <textarea 
+                    className="w-full h-32 p-4 bg-muted/20 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary shadow-sm text-sm font-mono placeholder:text-muted-foreground/50 resize-y"
+                    placeholder="Paste emails here (separated by commas or newlines)..."
+                    value={emailInput}
+                    onChange={e => setEmailInput(e.target.value)}
+                    onKeyDown={handleEmailInputKeyDown}
+                  ></textarea>
+                  <div className="mt-3 flex justify-end">
+                    <button 
+                      onClick={() => {
+                        handleAddEmails(emailInput.split(/[\s,]+/));
+                        setEmailInput('');
+                      }}
+                      className="px-6 py-2 bg-foreground text-background text-sm font-bold rounded-md hover:opacity-90 transition-opacity"
+                    >
+                      Add to List
+                    </button>
                   </div>
                 </div>
 
@@ -661,7 +491,7 @@ export default function CampaignEditWizard() {
                         {emails.map((e, i) => {
                           const isValid = EMAIL_REGEX.test(e)
                           return (
-                            <div key={i} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border font-medium shadow-sm transition-colors ${isValid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-destructive/10 border-destructive/20 text-destructive dark:text-red-400'}`}>
+                            <div key={i} className={lex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border font-medium shadow-sm transition-colors }>
                               {e}
                               <button onClick={() => removeEmail(e)} className="opacity-60 hover:opacity-100 p-0.5 rounded-full hover:bg-foreground/10 transition-colors">
                                 <X className="w-3 h-3" />
@@ -713,13 +543,7 @@ export default function CampaignEditWizard() {
                     </div>
                   )}
                 </div>
-                <button 
-                  onClick={() => {
-                    updateCampaign(id, { status: 'Sent' })
-                    router.push(`/campaigns/${id}/monitor`)
-                  }}
-                  className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:bg-primary-hover shadow-md transition-all"
-                >
+                <button className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:bg-primary-hover shadow-md transition-all">
                   Launch Campaign Now
                 </button>
              </div>
@@ -730,3 +554,9 @@ export default function CampaignEditWizard() {
     </div>
   )
 }
+'''
+
+with open(r'e:\_FreeMail\frontend\src\app\(dashboard)\campaigns\[id]\edit\page.tsx', 'w', encoding='utf-8') as f:
+    f.write(page_content)
+
+print('Updated page step 2 to exact old format and added attachments render')

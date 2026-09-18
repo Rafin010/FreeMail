@@ -1,0 +1,160 @@
+'use client'
+
+import React, { useState } from 'react'
+import { User, Server, Key, Palette, Save, ShieldCheck } from 'lucide-react'
+
+export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState<'General' | 'SMTP' | 'API'>('General')
+  
+  const [isSaved, setIsSaved] = useState(false)
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSaved(true)
+    setTimeout(() => setIsSaved(false), 2000)
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 animate-in fade-in duration-500">
+      
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage your account preferences and email configurations.</p>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-8">
+        
+        {/* Settings Sidebar */}
+        <div className="w-full md:w-64 shrink-0">
+          <nav className="flex flex-col space-y-1">
+            {[
+              { id: 'General', icon: User, label: 'Account Profile' },
+              { id: 'SMTP', icon: Server, label: 'SMTP Server' },
+              { id: 'API', icon: Key, label: 'API Keys' },
+            ].map(item => {
+              const Icon = item.icon
+              const isActive = activeTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id as any)}
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    isActive ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : ''}`} />
+                  {item.label}
+                </button>
+              )
+            })}
+          </nav>
+        </div>
+
+        {/* Settings Content Area */}
+        <div className="flex-1 bg-card border border-border rounded-xl shadow-sm overflow-hidden min-h-[400px]">
+          
+          <div className="p-6 border-b border-border bg-muted/20">
+            <h2 className="text-lg font-bold text-foreground">{activeTab} Settings</h2>
+            <p className="text-sm text-muted-foreground mt-1">Update your {activeTab.toLowerCase()} preferences here.</p>
+          </div>
+
+          <form onSubmit={handleSave} className="p-6 space-y-6">
+            
+            {activeTab === 'General' && (
+              <div className="space-y-4 animate-in slide-in-from-right-2 duration-300">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold">First Name</label>
+                    <input type="text" defaultValue="John" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold">Last Name</label>
+                    <input type="text" defaultValue="Doe" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Email Address</label>
+                  <input type="email" defaultValue="john.doe@example.com" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Timezone</label>
+                  <select className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm">
+                    <option>Asia/Dhaka (GMT+6)</option>
+                    <option>America/New_York (GMT-5)</option>
+                    <option>Europe/London (GMT+0)</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'SMTP' && (
+              <div className="space-y-4 animate-in slide-in-from-right-2 duration-300">
+                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg flex gap-3 text-sm text-blue-600 mb-6">
+                  <Server className="w-5 h-5 shrink-0" />
+                  <p>Configure your custom SMTP server to send emails. You can use services like SendGrid, Amazon SES, or Mailgun.</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">SMTP Host</label>
+                  <input type="text" placeholder="smtp.sendgrid.net" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold">Port</label>
+                    <input type="number" placeholder="587" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold">Encryption</label>
+                    <select className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm">
+                      <option>TLS / STARTTLS</option>
+                      <option>SSL</option>
+                      <option>None</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">SMTP Username</label>
+                  <input type="text" placeholder="apikey" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">SMTP Password</label>
+                  <input type="password" placeholder="••••••••••••••••" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'API' && (
+              <div className="space-y-6 animate-in slide-in-from-right-2 duration-300">
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">Secret API Key</h3>
+                  <div className="flex gap-2">
+                    <input type="text" readOnly value="sk_live_51M..." className="flex-1 h-10 px-3 rounded-md border border-input bg-muted/50 text-muted-foreground text-sm font-mono" />
+                    <button type="button" className="px-4 h-10 bg-secondary hover:bg-muted border border-border text-foreground font-medium rounded-md text-sm transition-colors">Copy</button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">Do not share this key with anyone. It has full access to your campaigns.</p>
+                </div>
+                <hr className="border-border" />
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">Webhook URL</h3>
+                  <input type="url" placeholder="https://your-domain.com/webhook" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
+                  <p className="text-xs text-muted-foreground mt-2">We will send POST requests here when emails are delivered or bounced.</p>
+                </div>
+              </div>
+            )}
+
+            <div className="pt-6 border-t border-border flex items-center justify-between">
+              <span className={`text-sm font-bold text-emerald-500 flex items-center gap-1.5 transition-opacity duration-300 ${isSaved ? 'opacity-100' : 'opacity-0'}`}>
+                <ShieldCheck className="w-4 h-4" /> Settings Saved
+              </span>
+              <button type="submit" className="flex items-center gap-2 bg-foreground text-background px-6 py-2.5 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity shadow-md">
+                <Save className="w-4 h-4" /> Save Changes
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+    </div>
+  )
+}

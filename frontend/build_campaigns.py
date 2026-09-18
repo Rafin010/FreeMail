@@ -1,6 +1,8 @@
-'use client'
+import os
 
-import React, { useState, useEffect } from 'react'
+content = r''''use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -14,12 +16,6 @@ export default function CampaignsPage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newCampaignName, setNewCampaignName] = useState('')
-  const [activeTab, setActiveTab] = useState<'All' | 'Drafts' | 'Sent'>('All')
-  const [mounted, setMounted] = useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,45 +26,26 @@ export default function CampaignsPage() {
     setNewCampaignName('')
     
     // Redirect to the wizard with the ID
-    router.push(`/campaigns/${newCamp.id}/edit`)
+    router.push(/campaigns//edit)
   }
 
-  const filteredCampaigns = campaigns.filter(c => {
-    if (activeTab === 'All') return true
-    if (activeTab === 'Drafts') return c.status === 'Draft'
-    if (activeTab === 'Sent') return c.status === 'Sent'
-    return true
-  })
-
-  if (!mounted) return null
-
   return (
-    <div className="space-y-6 relative animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 relative">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-foreground">Campaigns</h2>
-          <p className="text-muted-foreground mt-1 text-sm">Manage and track your email marketing campaigns.</p>
+          <p className="text-muted-foreground mt-1">Manage and track your email marketing campaigns.</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="gap-2 shadow-sm hover:scale-[1.02] transition-transform">
+        <Button onClick={() => setIsModalOpen(true)} className="gap-2">
           <Plus className="w-4 h-4" /> Create Campaign
         </Button>
       </div>
 
       {/* Tabs */}
       <div className="flex items-center gap-6 border-b border-border">
-        {(['All', 'Drafts', 'Sent'] as const).map(tab => (
-          <button 
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`pb-3 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === tab 
-                ? 'border-primary text-foreground' 
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab === 'All' ? 'All Campaigns' : tab}
-          </button>
-        ))}
+        <button className="pb-3 border-b-2 border-primary font-medium text-foreground">All Campaigns</button>
+        <button className="pb-3 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium">Drafts</button>
+        <button className="pb-3 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium">Sent</button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -85,14 +62,14 @@ export default function CampaignsPage() {
         </div>
 
         {/* Existing Campaigns */}
-        {filteredCampaigns.map(c => (
-          <Link key={c.id} href={`/campaigns/${c.id}/${c.status === 'Sent' ? 'monitor' : 'edit'}`} className="bg-card border border-border hover:border-foreground/20 hover:shadow-md transition-all rounded-xl p-6 flex flex-col min-h-[220px]">
+        {campaigns.map(c => (
+          <Link key={c.id} href={/campaigns//edit} className="bg-card border border-border hover:border-foreground/20 hover:shadow-md transition-all rounded-xl p-6 flex flex-col min-h-[220px]">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="font-semibold text-foreground">{c.name}</h3>
                 <p className="text-xs text-muted-foreground mt-1">Last edited: {c.date}</p>
               </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-md ${c.status === 'Sent' ? 'bg-emerald-100 text-emerald-700' : 'bg-secondary text-foreground'}`}>
+              <span className={	ext-xs font-medium px-2 py-1 rounded-md }>
                 {c.status}
               </span>
             </div>
@@ -148,3 +125,10 @@ export default function CampaignsPage() {
     </div>
   )
 }
+'''
+
+os.makedirs(r'e:\_FreeMail\frontend\src\app\(dashboard)\campaigns', exist_ok=True)
+with open(r'e:\_FreeMail\frontend\src\app\(dashboard)\campaigns\page.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+print('Success Campaigns')

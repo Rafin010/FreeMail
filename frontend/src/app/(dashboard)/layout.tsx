@@ -1,8 +1,10 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/shared/logo'
+import { useSession, signOut } from 'next-auth/react'
 import { 
   LayoutDashboard, 
   Megaphone, 
@@ -18,9 +20,6 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Campaigns', href: '/campaigns', icon: Megaphone },
-  { name: 'Audience', href: '/audience', icon: Users },
-  { name: 'Automations', href: '/automations', icon: Workflow },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
 ]
 
 export default function DashboardLayout({
@@ -29,6 +28,15 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const user = session?.user
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -74,7 +82,9 @@ export default function DashboardLayout({
             <Settings className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-foreground" />
             Settings
           </Link>
-          <button className="w-full mt-1 group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive transition-colors duration-200">
+          <button onClick={() => {
+            signOut({ callbackUrl: '/' })
+          }} className="w-full mt-1 group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive transition-colors duration-200">
             <LogOut className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-destructive" />
             Sign Out
           </button>
@@ -103,15 +113,25 @@ export default function DashboardLayout({
               <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
               <Bell className="h-5 w-5" />
             </button>
-            <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm shadow-sm cursor-pointer border border-primary-hover">
-              JD
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-foreground leading-none">{user?.name || 'User'}</p>
+                <p className="text-xs text-muted-foreground mt-1">{user?.email || 'user@example.com'}</p>
+              </div>
+              {user?.image ? (
+                <img src={user.image} alt="Profile" className="h-9 w-9 rounded-full object-cover border border-border shadow-sm cursor-pointer" />
+              ) : (
+                <div className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-sm cursor-pointer border border-primary-hover">
+                  {user?.name ? user.name.charAt(0) : 'U'}
+                </div>
+              )}
             </div>
           </div>
         </header>
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto p-8">
+          <div className={`max-w-7xl mx-auto ${pathname?.includes('/edit') || pathname?.includes('/campaigns/new') ? 'p-0' : 'p-8'}`}>
             {children}
           </div>
         </main>
