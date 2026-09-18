@@ -80,6 +80,69 @@ export default function CampaignEditWizard() {
     }
   }, [id, subjectLine, messageBody, buttonText, buttonUrl, theme, companyName, companyAddress, copyrightText, unsubscribeText, emails, attachments, headerBgColor, bodyBgColor, logoUrl, updateCampaign])
 
+  const [isSending, setIsSending] = useState(false)
+
+  const handleLaunchCampaign = async () => {
+    if (emails.length === 0) {
+      showError('Please add at least one recipient.')
+      return
+    }
+    
+    setIsSending(true)
+    
+    try {
+      const finalHtml = `
+        <div style="background-color: ${bodyBgColor}; padding: 40px 20px; font-family: sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: ${headerBgColor}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+            ${logoUrl ? `<img src="${logoUrl}" alt="Logo" style="max-height: 50px;" />` : `<h2 style="margin: 0; color: #333;">${companyName}</h2>`}
+          </div>
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            ${messageBody}
+            ${buttonText && buttonUrl ? `
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="${buttonUrl}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">${buttonText}</a>
+              </div>
+            ` : ''}
+          </div>
+          <div style="max-width: 600px; margin: 20px auto 0; text-align: center; font-size: 12px; color: #888;">
+            <p>${companyName}<br>${companyAddress}</p>
+            <p>${copyrightText}</p>
+            <p><a href="#" style="color: #888; text-decoration: underline;">${unsubscribeText}</a></p>
+          </div>
+        </div>
+      `;
+
+      const res = await fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: emails,
+          subject: subjectLine || 'FreeMail Campaign',
+          html: finalHtml
+        })
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        updateCampaign(id, { 
+          status: 'Sent',
+          subjectLine, messageBody, buttonText, buttonUrl, theme,
+          companyName, companyAddress, copyrightText, unsubscribeText,
+          rawEmails: emails.join('\n'),
+          attachments, headerBgColor, bodyBgColor, logoUrl
+        })
+        router.push(`/campaigns/${id}/monitor`)
+      } else {
+        showError(data.error || 'Failed to send emails. Please check your SMTP settings in .env.')
+      }
+    } catch (error) {
+      showError('Failed to send emails. Make sure your internet connection is working.')
+    } finally {
+      setIsSending(false)
+    }
+  }
+
   const showError = (msg: string) => {
     setErrorToast(msg)
     setTimeout(() => setErrorToast(null), 3000)
@@ -242,13 +305,11 @@ export default function CampaignEditWizard() {
             </button>
           ) : (
             <button 
-              onClick={() => {
-                updateCampaign(id, { status: 'Sent' })
-                router.push(`/campaigns/${id}/monitor`)
-              }}
-              className="px-6 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:bg-primary-hover transition-opacity shadow-lg animate-pulse"
+              onClick={handleLaunchCampaign}
+              disabled={isSending}
+              className="px-6 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:bg-primary-hover transition-opacity shadow-lg animate-pulse disabled:opacity-50"
             >
-              Launch Campaign
+              {isSending ? 'Sending...' : 'Launch Campaign'}
             </button>
           )}
         </div>
@@ -504,9 +565,9 @@ export default function CampaignEditWizard() {
                  
                  {/* Browser Mockup Top Bar */}
                  <div className="h-10 bg-zinc-950 border-b border-zinc-800 flex items-center px-4 gap-2 shrink-0">
-                   <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                   <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                   <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+                   <div className="w-3 h-3 rounded-full bg-[#FF5F56] shadow-sm"></div>
+                   <div className="w-3 h-3 rounded-full bg-[#FFBD2E] shadow-sm"></div>
+                   <div className="w-3 h-3 rounded-full bg-[#27C93F] shadow-sm"></div>
                    <div className="ml-4 text-xs font-medium text-zinc-500 flex-1 text-center pr-10">Live Preview</div>
                  </div>
 
@@ -714,13 +775,11 @@ export default function CampaignEditWizard() {
                   )}
                 </div>
                 <button 
-                  onClick={() => {
-                    updateCampaign(id, { status: 'Sent' })
-                    router.push(`/campaigns/${id}/monitor`)
-                  }}
-                  className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:bg-primary-hover shadow-md transition-all"
+                  onClick={handleLaunchCampaign}
+                  disabled={isSending}
+                  className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:bg-primary-hover shadow-md transition-all disabled:opacity-50"
                 >
-                  Launch Campaign Now
+                  {isSending ? 'Sending emails...' : 'Launch Campaign Now'}
                 </button>
              </div>
           </div>
