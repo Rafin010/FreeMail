@@ -316,11 +316,11 @@ export default function CampaignEditWizard() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden relative bg-background">
         {step === 1 && (
-          <div className="absolute inset-0 flex flex-col lg:flex-row">
+          <div className="absolute inset-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
             {/* Left Panel: Editor & Settings */}
-            <div className="w-full lg:w-1/2 h-full overflow-y-auto border-r border-border p-6 space-y-8 custom-scrollbar pb-32">
+            <div className="w-full lg:w-1/2 lg:h-full shrink-0 border-b lg:border-b-0 lg:border-r border-border p-4 sm:p-6 space-y-8 pb-12 lg:pb-32 lg:overflow-y-auto custom-scrollbar">
               
               <div className="bg-muted/30 p-5 rounded-xl border border-border">
                 <h2 className="text-lg font-bold text-foreground mb-4">Campaign Details</h2>
@@ -559,8 +559,8 @@ export default function CampaignEditWizard() {
 
             </div>
 
-            {/* Right Panel: Live Preview */}
-            <div className="w-full lg:w-1/2 h-full bg-zinc-950 p-4 sm:p-8 flex items-center justify-center overflow-y-auto">
+              {/* Right Panel: Live Preview */}
+              <div className="w-full lg:w-1/2 lg:h-full bg-zinc-950 p-4 sm:p-8 flex items-start lg:items-center justify-center lg:overflow-y-auto min-h-[500px] lg:min-h-0 shrink-0">
                <div className="w-full max-w-2xl bg-zinc-900 rounded-xl border border-zinc-800 shadow-2xl overflow-hidden flex flex-col max-h-full">
                  
                  {/* Browser Mockup Top Bar */}
@@ -650,7 +650,7 @@ export default function CampaignEditWizard() {
         )}
 
         {step === 2 && (
-          <div className="absolute inset-0 flex p-6 bg-background overflow-y-auto">
+          <div className="absolute inset-0 flex p-4 sm:p-6 bg-background overflow-y-auto pb-32">
              <div className="w-full max-w-5xl mx-auto space-y-6">
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -740,8 +740,8 @@ export default function CampaignEditWizard() {
         )}
 
         {step === 3 && (
-          <div className="absolute inset-0 flex items-center justify-center p-6 bg-background">
-             <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-lg text-center p-10">
+          <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 bg-background overflow-y-auto pb-32">
+             <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-lg text-center p-6 sm:p-10 my-auto">
                 <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border-8 border-background">
                   <Mail className="w-10 h-10 text-primary" />
                 </div>

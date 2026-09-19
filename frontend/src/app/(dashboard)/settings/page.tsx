@@ -2,8 +2,12 @@
 
 import React, { useState } from 'react'
 import { User, Server, Key, Palette, Save, ShieldCheck } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 
 export default function SettingsPage() {
+  const { data: session } = useSession()
+  const user = session?.user
+
   const [activeTab, setActiveTab] = useState<'General' | 'SMTP' | 'API'>('General')
   
   const [isSaved, setIsSaved] = useState(false)
@@ -62,19 +66,27 @@ export default function SettingsPage() {
             
             {activeTab === 'General' && (
               <div className="space-y-4 animate-in slide-in-from-right-2 duration-300">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">First Name</label>
-                    <input type="text" defaultValue="John" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Last Name</label>
-                    <input type="text" defaultValue="Doe" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm" />
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-3 mb-6">
+                  {user?.image ? (
+                    <img src={user.image} alt="Profile" className="w-12 h-12 rounded-full border border-primary/30" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
+                      {user?.name?.charAt(0) || 'U'}
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-foreground">Google Account Linked</h3>
+                    <p className="text-sm text-muted-foreground mt-0.5">Your profile is managed by Google. You cannot change these details here.</p>
                   </div>
                 </div>
+
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold">Email Address</label>
-                  <input type="email" defaultValue="john.doe@example.com" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm" />
+                  <label className="text-sm font-semibold text-muted-foreground">Full Name</label>
+                  <input type="text" readOnly value={user?.name || ''} className="w-full h-10 px-3 rounded-md border border-input bg-muted/50 text-muted-foreground cursor-not-allowed focus:outline-none text-sm" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground">Email Address</label>
+                  <input type="email" readOnly value={user?.email || ''} className="w-full h-10 px-3 rounded-md border border-input bg-muted/50 text-muted-foreground cursor-not-allowed focus:outline-none text-sm" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold">Timezone</label>
