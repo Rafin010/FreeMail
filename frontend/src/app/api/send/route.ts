@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     let successCount = 0;
     let failCount = 0;
-    let lastError = null;
+    let lastError: any = null;
 
     // Send emails individually
     const promises = toList.map(async (recipientEmail, index) => {
