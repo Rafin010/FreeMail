@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Logo } from '@/components/shared/logo'
+import { Logo, LogoIcon } from '@/components/shared/logo'
 import { useSession, signOut } from 'next-auth/react'
 import { 
   LayoutDashboard, 
@@ -72,9 +72,7 @@ export default function DashboardLayout({
       >
         <div className={`h-16 flex items-center border-b border-sidebar-border ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
           {isCollapsed ? (
-            <div className="w-10 h-10 bg-primary text-primary-foreground rounded-lg flex items-center justify-center font-bold text-xl">
-              F
-            </div>
+            <LogoIcon size="md" />
           ) : (
             <div className="flex items-center justify-between w-full">
               <Logo />

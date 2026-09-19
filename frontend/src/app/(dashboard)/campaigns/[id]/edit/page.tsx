@@ -49,6 +49,9 @@ export default function CampaignEditWizard() {
   // New Styling Fields
   const [headerBgColor, setHeaderBgColor] = useState(campaign?.headerBgColor || '#ffffff')
   const [bodyBgColor, setBodyBgColor] = useState(campaign?.bodyBgColor || '#f4f4f5')
+  const [paperBgColor, setPaperBgColor] = useState('#ffffff')
+  const [buttonBgColor, setButtonBgColor] = useState('#000000')
+  const [buttonTextColor, setButtonTextColor] = useState('#ffffff')
   const [logoUrl, setLogoUrl] = useState(campaign?.logoUrl || '')
 
   // Audience State
@@ -89,10 +92,11 @@ export default function CampaignEditWizard() {
         subjectLine, messageBody, buttonText, buttonUrl, theme,
         companyName, companyAddress, copyrightText, unsubscribeText,
         rawEmails: emails.join('\n'),
-        attachments, headerBgColor, bodyBgColor, logoUrl
+        attachments, headerBgColor, bodyBgColor, logoUrl,
+        paperBgColor, buttonBgColor, buttonTextColor
       })
     }
-  }, [id, subjectLine, messageBody, buttonText, buttonUrl, theme, companyName, companyAddress, copyrightText, unsubscribeText, emails, attachments, headerBgColor, bodyBgColor, logoUrl, updateCampaign])
+  }, [id, subjectLine, messageBody, buttonText, buttonUrl, theme, companyName, companyAddress, copyrightText, unsubscribeText, emails, attachments, headerBgColor, bodyBgColor, logoUrl, paperBgColor, buttonBgColor, buttonTextColor, updateCampaign])
 
   const [isSending, setIsSending] = useState(false)
 
@@ -108,13 +112,16 @@ export default function CampaignEditWizard() {
       const finalHtml = `
         <div style="background-color: ${bodyBgColor}; padding: 40px 20px; font-family: sans-serif;">
           <div style="max-width: 600px; margin: 0 auto; background-color: ${headerBgColor}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-            ${logoUrl ? `<img src="${logoUrl}" alt="Logo" style="max-height: 50px;" />` : `<h2 style="margin: 0; color: #333;">${companyName}</h2>`}
+            <div style="display: inline-block; vertical-align: middle;">
+              ${logoUrl ? `<img src="${logoUrl}" alt="Logo" style="max-height: 60px; max-width: 250px; object-fit: contain; display: inline-block; vertical-align: middle;" />` : ''}
+              ${(!logoUrl || companyName) ? `<h2 style="margin: 0 0 0 ${logoUrl ? '12px' : '0'}; display: inline-block; vertical-align: middle; color: ${headerBgColor === '#ffffff' ? '#000' : '#fff'}; font-size: 24px;">${companyName}</h2>` : ''}
+            </div>
           </div>
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <div style="max-width: 600px; margin: 0 auto; background-color: ${paperBgColor}; padding: 40px 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
             ${messageBody}
             ${buttonText && buttonUrl ? `
               <div style="text-align: center; margin-top: 30px;">
-                <a href="${buttonUrl}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">${buttonText}</a>
+                <a href="${buttonUrl}" style="display: inline-block; padding: 12px 24px; background-color: ${buttonBgColor}; color: ${buttonTextColor}; text-decoration: none; border-radius: 6px; font-weight: bold;">${buttonText}</a>
               </div>
             ` : ''}
           </div>
@@ -400,35 +407,36 @@ export default function CampaignEditWizard() {
                   <div className="space-y-2">
                     <label className="block text-xs font-semibold text-muted-foreground">Header Background Color</label>
                     <div className="flex gap-2 items-center">
-                      <input 
-                        type="color" 
-                        value={headerBgColor}
-                        onChange={e => setHeaderBgColor(e.target.value)}
-                        className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                      />
-                      <input 
-                        type="text" 
-                        value={headerBgColor}
-                        onChange={e => setHeaderBgColor(e.target.value)}
-                        className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono"
-                      />
+                      <input type="color" value={headerBgColor} onChange={e => setHeaderBgColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
+                      <input type="text" value={headerBgColor} onChange={e => setHeaderBgColor(e.target.value)} className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-muted-foreground">Email Background Color</label>
+                    <label className="block text-xs font-semibold text-muted-foreground">App Background Color</label>
                     <div className="flex gap-2 items-center">
-                      <input 
-                        type="color" 
-                        value={bodyBgColor}
-                        onChange={e => setBodyBgColor(e.target.value)}
-                        className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                      />
-                      <input 
-                        type="text" 
-                        value={bodyBgColor}
-                        onChange={e => setBodyBgColor(e.target.value)}
-                        className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono"
-                      />
+                      <input type="color" value={bodyBgColor} onChange={e => setBodyBgColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
+                      <input type="text" value={bodyBgColor} onChange={e => setBodyBgColor(e.target.value)} className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-xs font-semibold text-muted-foreground">Email Paper Color</label>
+                    <div className="flex gap-2 items-center">
+                      <input type="color" value={paperBgColor} onChange={e => setPaperBgColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
+                      <input type="text" value={paperBgColor} onChange={e => setPaperBgColor(e.target.value)} className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-xs font-semibold text-muted-foreground">Button Background Color</label>
+                    <div className="flex gap-2 items-center">
+                      <input type="color" value={buttonBgColor} onChange={e => setButtonBgColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
+                      <input type="text" value={buttonBgColor} onChange={e => setButtonBgColor(e.target.value)} className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono" />
+                    </div>
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <label className="block text-xs font-semibold text-muted-foreground">Button Text Color</label>
+                    <div className="flex gap-2 items-center">
+                      <input type="color" value={buttonTextColor} onChange={e => setButtonTextColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
+                      <input type="text" value={buttonTextColor} onChange={e => setButtonTextColor(e.target.value)} className="flex-1 h-8 px-2 text-sm bg-muted/50 border border-input rounded uppercase font-mono" />
                     </div>
                   </div>
                 </div>
@@ -610,65 +618,64 @@ export default function CampaignEditWizard() {
                    <div className="ml-4 text-xs font-medium text-zinc-500 flex-1 text-center pr-10">Live Preview</div>
                  </div>
 
-                 {/* Simulated Email Client Viewport */}
-                 <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar" style={{ backgroundColor: bodyBgColor }}>
-                   <div className={`w-full max-w-lg mx-auto rounded-lg shadow-sm overflow-hidden border ${
-                     theme==='dark' ? 'bg-black border-zinc-800 text-white' : 
-                     theme==='minimal' ? 'bg-white border-gray-100 text-gray-900' : 
-                     'bg-white border-gray-200 text-gray-900'}
-                   `}>
-                      {/* Email Header */}
-                      <div className={`h-16 flex items-center px-6`} style={{ backgroundColor: headerBgColor }}>
-                        {logoUrl ? (
-                          <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-full object-cover shadow-sm border border-border/20" />
-                        ) : (
-                          <>
-                            <div className="w-8 h-8 rounded-md bg-zinc-900 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                              {companyName ? companyName.charAt(0).toUpperCase() : 'F'}
-                            </div>
-                            <span className="ml-3 font-bold text-lg mix-blend-difference" style={{ color: headerBgColor === '#ffffff' ? '#000' : '#fff' }}>
-                              {companyName || 'FreeMail Co.'}
-                            </span>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Email Body */}
-                      <div className="p-8">
-                        {subjectLine && <h1 className="text-2xl font-bold mb-6 opacity-90">{subjectLine}</h1>}
-                        {!subjectLine && <h1 className="text-2xl font-bold mb-6 opacity-20">Your Subject Line Will Appear Here</h1>}
-                        
-                        <div 
-                          className="prose prose-sm max-w-none opacity-90"
-                          dangerouslySetInnerHTML={{ __html: messageBody }}
-                        />
-                        
-                        {/* Live Preview Attachment Boxes */}
-                        {attachments.length > 0 && (
-                          <div className="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-800">
-                            <p className="text-xs font-bold uppercase tracking-wider mb-3 opacity-50">Attachments</p>
-                            <div className="flex flex-wrap gap-3">
-                              {attachments.map((file, i) => (
-                                <a key={i} href={file.url} download={file.name} className={`flex items-center gap-3 p-3 rounded-lg border ${theme==='dark'?'border-zinc-800 bg-zinc-900 hover:bg-zinc-800':'border-gray-200 bg-gray-50 hover:bg-gray-100'} shadow-sm max-w-xs transition-colors cursor-pointer group`}>
-                                  <div className={`w-10 h-10 ${theme==='dark'?'bg-zinc-950':'bg-white'} rounded-md flex items-center justify-center shrink-0 border ${theme==='dark'?'border-zinc-800':'border-gray-200'}`}>
-                                    {getFileIcon(file.name, file.type)}
-                                  </div>
-                                  <div className="flex-1 min-w-0 pr-2">
-                                    <p className={`text-sm font-semibold truncate ${theme==='dark'?'text-white':'text-gray-900'} group-hover:underline`}>{file.name}</p>
-                                    <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
-                                  </div>
-                                </a>
-                              ))}
-                            </div>
+                   {/* Simulated Email Client Viewport */}
+                   <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar" style={{ backgroundColor: bodyBgColor }}>
+                     <div className={`w-full max-w-lg mx-auto rounded-lg shadow-sm overflow-hidden border ${
+                       theme==='dark' ? 'border-zinc-800 text-white' : 
+                       theme==='minimal' ? 'border-gray-100 text-gray-900' : 
+                       'border-gray-200 text-gray-900'}
+                     `} style={{ backgroundColor: paperBgColor }}>
+                        {/* Email Header */}
+                        <div className={`py-4 px-6 flex items-center justify-center`} style={{ backgroundColor: headerBgColor }}>
+                          <div className="flex items-center gap-3">
+                            {logoUrl && (
+                              <img src={logoUrl} alt="Logo" className="max-h-12 max-w-[200px] object-contain" />
+                            )}
+                            {(!logoUrl || companyName) && (
+                              <span className="font-bold text-xl mix-blend-difference" style={{ color: headerBgColor === '#ffffff' ? '#000' : '#fff' }}>
+                                {companyName || (logoUrl ? '' : 'FreeMail Co.')}
+                              </span>
+                            )}
                           </div>
-                        )}
-                        
-                        {/* CTA Button */}
-                        {buttonText && (
-                          <div className="mt-8">
-                            <a href={buttonUrl || "#"} className={`inline-block px-6 py-2.5 ${theme==='dark'?'bg-white text-black':'bg-black text-white'} font-medium text-sm rounded-md transition-transform hover:-translate-y-0.5 shadow-sm`}>
-                              {buttonText}
-                            </a>
+                        </div>
+  
+                        {/* Email Body */}
+                        <div className="p-6 sm:p-8 space-y-6">
+                          <h1 className="text-2xl font-extrabold tracking-tight opacity-90">
+                            {subjectLine || 'Your Subject Line Will Appear Here'}
+                          </h1>
+  
+                          <div 
+                            className="prose prose-sm max-w-none opacity-90"
+                            dangerouslySetInnerHTML={{ __html: messageBody || 'Write your email here...' }}
+                          />
+                          
+                          {/* Live Preview Attachment Boxes */}
+                          {attachments.length > 0 && (
+                            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-800">
+                              <p className="text-xs font-bold uppercase tracking-wider mb-3 opacity-50">Attachments</p>
+                              <div className="flex flex-wrap gap-3">
+                                {attachments.map((file, i) => (
+                                  <a key={i} href={file.url} download={file.name} className={`flex items-center gap-3 p-3 rounded-lg border ${theme==='dark'?'border-zinc-800 bg-zinc-900 hover:bg-zinc-800':'border-gray-200 bg-gray-50 hover:bg-gray-100'} shadow-sm max-w-xs transition-colors cursor-pointer group`}>
+                                    <div className={`w-10 h-10 ${theme==='dark'?'bg-zinc-950':'bg-white'} rounded-md flex items-center justify-center shrink-0 border ${theme==='dark'?'border-zinc-800':'border-gray-200'}`}>
+                                      {getFileIcon(file.name, file.type)}
+                                    </div>
+                                    <div className="flex-1 min-w-0 pr-2">
+                                      <p className={`text-sm font-semibold truncate ${theme==='dark'?'text-white':'text-gray-900'} group-hover:underline`}>{file.name}</p>
+                                      <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* CTA Button */}
+                          {buttonText && (
+                            <div className="mt-8">
+                              <a href={buttonUrl || "#"} className={`inline-block px-6 py-2.5 font-medium text-sm rounded-md shadow-sm`} style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}>
+                                {buttonText}
+                              </a>
                           </div>
                         )}
                       </div>
