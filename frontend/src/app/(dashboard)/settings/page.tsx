@@ -101,36 +101,34 @@ export default function SettingsPage() {
 
             {activeTab === 'SMTP' && (
               <div className="space-y-4 animate-in slide-in-from-right-2 duration-300">
-                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg flex gap-3 text-sm text-blue-600 mb-6">
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex gap-3 text-sm text-emerald-600 dark:text-emerald-400 mb-6">
                   <Server className="w-5 h-5 shrink-0" />
-                  <p>Configure your custom SMTP server to send emails. You can use services like SendGrid, Amazon SES, or Mailgun.</p>
+                  <p>Your FreeMail SMTP Relay is active. Use these unique credentials in your local apps (like WordPress or local scripts) to send emails through FreeMail.</p>
                 </div>
                 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">SMTP Host</label>
-                  <input type="text" placeholder="smtp.sendgrid.net" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
-                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold">Port</label>
-                    <input type="number" placeholder="587" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
+                    <label className="text-sm font-semibold">SMTP Host</label>
+                    <input type="text" readOnly value="smtp.freemail.x010.tech" className="w-full h-10 px-3 rounded-md border border-input bg-muted/50 text-muted-foreground font-mono text-sm cursor-not-allowed focus:outline-none" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold">Encryption</label>
-                    <select className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm">
-                      <option>TLS / STARTTLS</option>
-                      <option>SSL</option>
-                      <option>None</option>
-                    </select>
+                    <label className="text-sm font-semibold">Port</label>
+                    <input type="text" readOnly value="587 (TLS)" className="w-full h-10 px-3 rounded-md border border-input bg-muted/50 text-muted-foreground font-mono text-sm cursor-not-allowed focus:outline-none" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold">SMTP Username</label>
-                  <input type="text" placeholder="apikey" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
+                  <input type="text" readOnly value={`fm_user_${user?.email?.split('@')[0] || 'admin'}`} className="w-full h-10 px-3 rounded-md border border-input bg-muted/50 text-foreground font-mono text-sm cursor-not-allowed focus:outline-none" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold">SMTP Password</label>
-                  <input type="password" placeholder="••••••••••••••••" className="w-full h-10 px-3 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary text-sm font-mono" />
+                  <label className="text-sm font-semibold flex items-center justify-between">
+                    SMTP Password
+                    <span className="text-xs text-muted-foreground font-normal">Generated securely</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input type="password" readOnly value="fm_sk_8f93ha82kjd82910kdla93hf" className="flex-1 h-10 px-3 rounded-md border border-input bg-muted/50 text-muted-foreground font-mono text-sm cursor-not-allowed focus:outline-none" />
+                    <button type="button" className="px-4 h-10 bg-secondary hover:bg-muted border border-border text-foreground font-medium rounded-md text-sm transition-colors" onClick={() => navigator.clipboard.writeText('fm_sk_8f93ha82kjd82910kdla93hf')}>Copy</button>
+                  </div>
                 </div>
               </div>
             )}

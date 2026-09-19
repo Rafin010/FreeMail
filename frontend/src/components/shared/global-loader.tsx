@@ -7,10 +7,10 @@ export function GlobalLoader({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Show loading animation for 1.5 seconds on initial mount
+    // Wait for full animation to finish
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 1500)
+    }, 2800)
     return () => clearTimeout(timer)
   }, [])
 
@@ -25,7 +25,14 @@ export function GlobalLoader({ children }: { children: React.ReactNode }) {
           unoptimized
           priority
         />
-        <h2 className="text-white font-semibold text-xl mt-4 tracking-wider animate-pulse">Loading FreeMail...</h2>
+        <h2 className="text-white font-semibold text-xl mt-4 tracking-widest flex items-baseline">
+          Loading
+          <span className="inline-flex ml-1 w-6">
+            <span className="animate-[bounce_1.4s_infinite] [animation-delay:-0.32s]">.</span>
+            <span className="animate-[bounce_1.4s_infinite] [animation-delay:-0.16s]">.</span>
+            <span className="animate-[bounce_1.4s_infinite]">.</span>
+          </span>
+        </h2>
       </div>
     )
   }
