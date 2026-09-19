@@ -40,6 +40,9 @@ export type Campaign = {
   attachments?: { name: string, size: number, type: string, url: string }[]
   headerBgColor?: string
   bodyBgColor?: string
+  paperBgColor?: string
+  buttonBgColor?: string
+  buttonTextColor?: string
   logoUrl?: string
 }
 
