@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
   try {
-    const { to, subject, html } = await request.json();
+    const { to, subject, html, customSmtp } = await request.json();
 
     if (!to || !subject || !html) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -14,59 +14,57 @@ export async function POST(request: Request) {
        return NextResponse.json({ error: 'Invalid recipient list' }, { status: 400 });
     }
 
-    // Support for Multi-SMTP Rotation
-    // Try to parse SMTP_ACCOUNTS JSON array, otherwise fallback to single SMTP_USER / SMTP_PASSWORD
-    let accounts: { user: string, pass: string }[] = [];
-    
-    if (process.env.SMTP_ACCOUNTS) {
-      try {
-        accounts = JSON.parse(process.env.SMTP_ACCOUNTS);
-      } catch (e) {
-        console.error('Failed to parse SMTP_ACCOUNTS environment variable. Ensure it is valid JSON.');
-      }
-    }
+    let transporters = [];
 
-    // Fallback to single account if no JSON array provided
-    if (accounts.length === 0 && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
-      accounts.push({
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD
-      });
-    }
+    // If client provides their own SMTP (BYOE model), use only that
+    if (customSmtp && customSmtp.user && customSmtp.pass) {
+      const host = customSmtp.host || 'smtp.gmail.com';
+      const port = Number(customSmtp.port) || 465;
+      const secure = port === 465;
 
-    if (accounts.length === 0) {
-      return NextResponse.json({ error: 'No SMTP accounts configured on the server.' }, { status: 500 });
-    }
-
-    const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const port = Number(process.env.SMTP_PORT) || 465;
-    const secure = port === 465;
-
-    // Create a transporter for each account
-    const transporters = accounts.map(account => {
-      return {
-        email: account.user,
+      transporters.push({
+        email: customSmtp.user,
         transporter: nodemailer.createTransport({
           host,
           port,
           secure,
           auth: {
-            user: account.user,
-            pass: account.pass,
+            user: customSmtp.user,
+            pass: customSmtp.pass,
           },
         })
-      };
-    });
+      });
+    } else {
+      // Fallback to server-side Multi-SMTP Rotation (FreeMail Shared Pool)
+      let accounts: { user: string, pass: string }[] = [];
+      if (process.env.SMTP_ACCOUNTS) {
+        try { accounts = JSON.parse(process.env.SMTP_ACCOUNTS); } catch (e) {}
+      }
+      if (accounts.length === 0 && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+        accounts.push({ user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD });
+      }
+
+      if (accounts.length === 0) {
+        return NextResponse.json({ error: 'No SMTP accounts configured on the server.' }, { status: 500 });
+      }
+
+      const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+      const port = Number(process.env.SMTP_PORT) || 465;
+      const secure = port === 465;
+
+      transporters = accounts.map(account => ({
+        email: account.user,
+        transporter: nodemailer.createTransport({ host, port, secure, auth: { user: account.user, pass: account.pass } })
+      }));
+    }
 
     let successCount = 0;
     let failCount = 0;
     let lastError = null;
 
-    // Send emails individually to protect privacy (BCC effect) and distribute load
-    // Using simple Round-Robin across available SMTP accounts
+    // Send emails individually
     const promises = toList.map(async (recipientEmail, index) => {
-      const sender = transporters[index % transporters.length]; // Round-Robin selection
-      
+      const sender = transporters[index % transporters.length];
       try {
         await sender.transporter.sendMail({
           from: `"FreeMail" <${sender.email}>`,
@@ -82,7 +80,6 @@ export async function POST(request: Request) {
       }
     });
 
-    // Wait for all emails to be processed
     await Promise.allSettled(promises);
 
     if (successCount === 0 && failCount > 0) {

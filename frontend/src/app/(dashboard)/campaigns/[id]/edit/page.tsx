@@ -54,15 +54,29 @@ export default function CampaignEditWizard() {
   // Audience State
   const [emails, setEmails] = useState<string[]>((campaign?.rawEmails || '').split('\n').filter(Boolean))
   const [emailInput, setEmailInput] = useState('')
+  const [isAiLoading, setIsAiLoading] = useState(false)
+  const [aiPrompt, setAiPrompt] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const [errorToast, setErrorToast] = useState<string | null>(null)
   
+  // Connected Accounts State (BYOE)
+  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([])
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('default')
+
   // Attachments State
   const [attachments, setAttachments] = useState<{name: string, size: number, type: string, url: string}[]>(campaign?.attachments || [])
+  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([])
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('default')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    const saved = localStorage.getItem('freemail_connected_accounts')
+    if (saved) {
+      try {
+        setConnectedAccounts(JSON.parse(saved))
+      } catch(e) {}
+    }
   }, [])
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -112,13 +126,20 @@ export default function CampaignEditWizard() {
         </div>
       `;
 
+      let customSmtp = undefined;
+      if (selectedAccountId !== 'default') {
+        const acc = connectedAccounts.find(a => a.id === selectedAccountId);
+        if (acc) customSmtp = acc;
+      }
+
       const res = await fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           to: emails,
           subject: subjectLine || 'FreeMail Campaign',
-          html: finalHtml
+          html: finalHtml,
+          customSmtp
         })
       });
 
@@ -324,7 +345,7 @@ export default function CampaignEditWizard() {
               
               <div className="bg-muted/30 p-5 rounded-xl border border-border">
                 <h2 className="text-lg font-bold text-foreground mb-4">Campaign Details</h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-semibold mb-2">Campaign Name</label>
                     <input 
@@ -348,6 +369,24 @@ export default function CampaignEditWizard() {
                       ))}
                     </div>
                   </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Sender Profile (From Email)</label>
+                  <select 
+                    value={selectedAccountId}
+                    onChange={(e) => setSelectedAccountId(e.target.value)}
+                    className="w-full h-10 px-3 bg-background border border-input rounded-md text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
+                  >
+                    <option value="default">🌐 FreeMail Shared Pool (1,500/day limit)</option>
+                    {connectedAccounts.map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        ✉️ {acc.user} ({acc.host === 'smtp.gmail.com' ? '500/day' : 'Custom Limit'})
+                      </option>
+                    ))}
+                  </select>
+                  {connectedAccounts.length === 0 && (
+                    <p className="text-xs text-muted-foreground mt-1.5">Go to Settings to connect your own email.</p>
+                  )}
                 </div>
               </div>
 
