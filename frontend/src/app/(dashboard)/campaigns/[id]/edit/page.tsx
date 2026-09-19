@@ -75,8 +75,12 @@ export default function CampaignEditWizard() {
     const saved = localStorage.getItem('freemail_connected_accounts')
     if (saved) {
       try {
-        setConnectedAccounts(JSON.parse(saved))
-      } catch(e) {}
+        const parsed = JSON.parse(saved)
+        setConnectedAccounts(parsed)
+        if (parsed.length > 0) setSelectedAccountId(parsed[0].id)
+      } catch (e) {
+        console.error(e)
+      }
     }
   }, [])
 
@@ -377,24 +381,6 @@ export default function CampaignEditWizard() {
                     </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Sender Profile (From Email)</label>
-                  <select 
-                    value={selectedAccountId}
-                    onChange={(e) => setSelectedAccountId(e.target.value)}
-                    className="w-full h-10 px-3 bg-background border border-input rounded-md text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
-                  >
-                    <option value="default">🌐 FreeMail Shared Pool (1,500/day limit)</option>
-                    {connectedAccounts.map(acc => (
-                      <option key={acc.id} value={acc.id}>
-                        ✉️ {acc.user} ({acc.host === 'smtp.gmail.com' ? '500/day' : 'Custom Limit'})
-                      </option>
-                    ))}
-                  </select>
-                  {connectedAccounts.length === 0 && (
-                    <p className="text-xs text-muted-foreground mt-1.5">Go to Settings to connect your own email.</p>
-                  )}
-                </div>
               </div>
 
               {/* Advanced Header & Colors */}
@@ -473,6 +459,29 @@ export default function CampaignEditWizard() {
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2">Sender Profile (From Email)</label>
+                <select 
+                  value={selectedAccountId}
+                  onChange={(e) => setSelectedAccountId(e.target.value)}
+                  className="w-full h-11 px-4 mb-6 bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary shadow-sm text-sm font-medium disabled:opacity-50"
+                  disabled={connectedAccounts.length === 0}
+                >
+                  {connectedAccounts.length === 0 ? (
+                    <option value="">⚠️ No email accounts connected</option>
+                  ) : (
+                    connectedAccounts.map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        📧 {acc.user} ({acc.host === 'smtp.gmail.com' ? '500/day' : 'Custom Limit'})
+                      </option>
+                    ))
+                  )}
+                </select>
+                {connectedAccounts.length === 0 && (
+                  <p className="text-xs text-destructive mt-1 mb-6 -translate-y-4">You must connect an email in Settings to send campaigns.</p>
+                )}
               </div>
 
               <div>
