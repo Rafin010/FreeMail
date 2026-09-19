@@ -68,8 +68,6 @@ export default function CampaignEditWizard() {
 
   // Attachments State
   const [attachments, setAttachments] = useState<{name: string, size: number, type: string, url: string}[]>(campaign?.attachments || [])
-  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([])
-  const [selectedAccountId, setSelectedAccountId] = useState<string>('default')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
