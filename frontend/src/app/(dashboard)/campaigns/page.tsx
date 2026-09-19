@@ -1,24 +1,39 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Plus, MousePointerClick, Eye, Users, X } from 'lucide-react'
+import { Plus, MousePointerClick, Eye, Users, X, MoreVertical, Trash2 } from 'lucide-react'
 import { useCampaignStore } from '@/store/campaign-store'
 
 export default function CampaignsPage() {
   const router = useRouter()
   const campaigns = useCampaignStore(state => state.campaigns)
   const addCampaign = useCampaignStore(state => state.addCampaign)
+  const deleteCampaign = useCampaignStore(state => state.deleteCampaign)
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newCampaignName, setNewCampaignName] = useState('')
   const [activeTab, setActiveTab] = useState<'All' | 'Drafts' | 'Sent'>('All')
   const [mounted, setMounted] = useState(false)
+  
+  const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null)
+  const [campaignToDelete, setCampaignToDelete] = useState<{id: string, name: string} | null>(null)
+  
+  const menuRef = useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
     setMounted(true)
+    
+    // Close menu when clicking outside
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenFor(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const handleCreate = (e: React.FormEvent) => {
@@ -31,6 +46,13 @@ export default function CampaignsPage() {
     
     // Redirect to the wizard with the ID
     router.push(`/campaigns/${newCamp.id}/edit`)
+  }
+  
+  const confirmDelete = () => {
+    if (campaignToDelete) {
+      deleteCampaign(campaignToDelete.id)
+      setCampaignToDelete(null)
+    }
   }
 
   const filteredCampaigns = campaigns.filter(c => {
@@ -86,32 +108,68 @@ export default function CampaignsPage() {
 
         {/* Existing Campaigns */}
         {filteredCampaigns.map(c => (
-          <Link key={c.id} href={`/campaigns/${c.id}/${c.status === 'Sent' ? 'monitor' : 'edit'}`} className="bg-card border border-border hover:border-foreground/20 hover:shadow-md transition-all rounded-xl p-6 flex flex-col min-h-[220px]">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="font-semibold text-foreground">{c.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">Last edited: {c.date}</p>
+          <div key={c.id} className="relative bg-card border border-border hover:border-foreground/20 hover:shadow-md transition-all rounded-xl flex flex-col min-h-[220px]">
+            {/* Clickable Area for Navigation */}
+            <div 
+              onClick={(e) => {
+                // Navigate only if the click wasn't on the menu button
+                if (!(e.target as HTMLElement).closest('.menu-button-area')) {
+                  router.push(`/campaigns/${c.id}/${c.status === 'Sent' ? 'monitor' : 'edit'}`)
+                }
+              }}
+              className="flex-1 p-6 flex flex-col cursor-pointer"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div className="pr-8">
+                  <h3 className="font-semibold text-foreground">{c.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Last edited: {c.date}</p>
+                </div>
+                <span className={`text-xs font-medium px-2 py-1 rounded-md ${c.status === 'Sent' ? 'bg-emerald-100 text-emerald-700' : 'bg-secondary text-foreground'}`}>
+                  {c.status}
+                </span>
               </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-md ${c.status === 'Sent' ? 'bg-emerald-100 text-emerald-700' : 'bg-secondary text-foreground'}`}>
-                {c.status}
-              </span>
+
+              <div className="mt-auto grid grid-cols-3 gap-2 border-t border-border pt-4">
+                 <div className="flex flex-col gap-1">
+                   <span className="text-xs text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3"/> Sent</span>
+                   <span className="font-semibold text-sm">{c.sent || 0}</span>
+                 </div>
+                 <div className="flex flex-col gap-1">
+                   <span className="text-xs text-muted-foreground flex items-center gap-1"><Eye className="w-3 h-3"/> Opens</span>
+                   <span className="font-semibold text-sm">{c.opens || 0}</span>
+                 </div>
+                 <div className="flex flex-col gap-1">
+                   <span className="text-xs text-muted-foreground flex items-center gap-1"><MousePointerClick className="w-3 h-3"/> Clicks</span>
+                   <span className="font-semibold text-sm">{c.clicks || 0}</span>
+                 </div>
+              </div>
             </div>
 
-            <div className="mt-auto grid grid-cols-3 gap-2 border-t border-border pt-4">
-               <div className="flex flex-col gap-1">
-                 <span className="text-xs text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3"/> Sent</span>
-                 <span className="font-semibold text-sm">{c.sent}</span>
-               </div>
-               <div className="flex flex-col gap-1">
-                 <span className="text-xs text-muted-foreground flex items-center gap-1"><Eye className="w-3 h-3"/> Opens</span>
-                 <span className="font-semibold text-sm">{c.opens}</span>
-               </div>
-               <div className="flex flex-col gap-1">
-                 <span className="text-xs text-muted-foreground flex items-center gap-1"><MousePointerClick className="w-3 h-3"/> Clicks</span>
-                 <span className="font-semibold text-sm">{c.clicks}</span>
-               </div>
+            {/* 3 Dot Menu Button */}
+            <div className="absolute top-5 right-4 menu-button-area z-10" ref={menuOpenFor === c.id ? menuRef : null}>
+              <button 
+                onClick={() => setMenuOpenFor(menuOpenFor === c.id ? null : c.id)}
+                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+              
+              {/* Dropdown */}
+              {menuOpenFor === c.id && (
+                <div className="absolute right-0 mt-1 w-36 bg-popover border border-border rounded-lg shadow-lg py-1 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                  <button 
+                    onClick={() => {
+                      setMenuOpenFor(null)
+                      setCampaignToDelete({id: c.id, name: c.name})
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" /> Delete
+                  </button>
+                </div>
+              )}
             </div>
-          </Link>
+          </div>
         ))}
 
       </div>
@@ -141,6 +199,30 @@ export default function CampaignsPage() {
                 <Button type="submit" disabled={!newCampaignName.trim()}>Create & Continue</Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {campaignToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-destructive/5 text-destructive">
+              <h3 className="font-semibold text-lg flex items-center gap-2"><Trash2 className="w-5 h-5" /> Delete Campaign</h3>
+              <button onClick={() => setCampaignToDelete(null)} className="p-1 hover:bg-destructive/10 rounded-md transition-colors text-destructive hover:text-destructive/80">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-foreground mb-1">Are you sure you want to delete this campaign?</p>
+              <p className="font-bold text-foreground bg-muted/50 py-2 px-3 rounded-md mt-3 inline-block break-all">"{campaignToDelete.name}"</p>
+              <p className="text-sm text-muted-foreground mt-4">This action cannot be undone. All data and stats will be permanently removed.</p>
+              
+              <div className="flex gap-3 justify-end mt-8">
+                <Button type="button" variant="outline" onClick={() => setCampaignToDelete(null)}>Cancel</Button>
+                <Button type="button" variant="destructive" onClick={confirmDelete}>Yes, Delete</Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

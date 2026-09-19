@@ -84,7 +84,7 @@ export default function SettingsPage() {
           <nav className="flex flex-col space-y-1">
             {[
               { id: 'General', icon: User, label: 'Account Profile' },
-              { id: 'SMTP', icon: Server, label: 'Verified Senders (SMTP)' },
+              { id: 'SMTP', icon: Server, label: 'SMTP Server' },
               { id: 'API', icon: Key, label: 'API Keys' },
             ].map(item => {
               const Icon = item.icon
@@ -144,7 +144,7 @@ export default function SettingsPage() {
                   <span className={`text-sm font-bold text-emerald-500 flex items-center gap-1.5 transition-opacity duration-300 ${isSaved ? 'opacity-100' : 'opacity-0'}`}>
                     <ShieldCheck className="w-4 h-4" /> Settings Saved
                   </span>
-                  <button type="submit" className="flex items-center gap-2 bg-foreground text-background px-6 py-2.5 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity shadow-md">
+                  <button type="submit" className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors shadow-md">
                     <Save className="w-4 h-4" /> Save Changes
                   </button>
                 </div>

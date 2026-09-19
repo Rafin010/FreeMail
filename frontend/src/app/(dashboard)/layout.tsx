@@ -119,12 +119,18 @@ export default function DashboardLayout({
           <Link
             href="/settings"
             onClick={() => setIsMobileOpen(false)}
-            className={`group flex items-center py-2.5 rounded-lg text-sidebar-foreground hover:bg-sidebar-hover transition-colors duration-200 ${
+            className={`group flex items-center py-2.5 rounded-lg transition-colors duration-200 ${
               isCollapsed ? 'justify-center w-full px-0' : 'px-3'
+            } ${
+              pathname === '/settings'
+                ? 'bg-sidebar-active text-sidebar-active-foreground'
+                : 'text-sidebar-foreground hover:bg-sidebar-hover hover:text-foreground'
             }`}
             title={isCollapsed ? "Settings" : undefined}
           >
-            <Settings className={`h-5 w-5 text-muted-foreground group-hover:text-foreground ${!isCollapsed && 'mr-3'}`} />
+            <Settings className={`h-5 w-5 flex-shrink-0 ${
+              pathname === '/settings' ? 'text-sidebar-active-foreground' : 'text-muted-foreground group-hover:text-foreground'
+            } ${!isCollapsed && 'mr-3'}`} />
             {!isCollapsed && <span className="font-medium text-sm">Settings</span>}
           </Link>
           <button 

@@ -154,6 +154,7 @@ export default function CampaignEditWizard() {
       if (res.ok) {
         updateCampaign(id, { 
           status: 'Sent',
+          sent: emails.length,
           subjectLine, messageBody, buttonText, buttonUrl, theme,
           companyName, companyAddress, copyrightText, unsubscribeText,
           rawEmails: emails.join('\n'),
