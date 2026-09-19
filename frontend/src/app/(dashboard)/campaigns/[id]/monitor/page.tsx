@@ -38,7 +38,7 @@ export default function CampaignMonitorPage() {
   const bounced = 0
 
   const deliveryLogs = emails.map((email, i) => {
-    const time = new Date(new Date(campaign.createdAt).getTime() + (i * 1200)).toLocaleString()
+    const time = new Date(new Date(campaign.date).getTime() + (i * 1200)).toLocaleString()
     return { email, status: 'Delivered', reason: '-', time }
   })
 
