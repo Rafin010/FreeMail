@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
   try {
-    const { to, subject, html, customSmtp } = await request.json();
+    const { to, subject, html, customSmtp, fromName } = await request.json();
 
     if (!to || !subject || !html) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -65,9 +65,10 @@ export async function POST(request: Request) {
     // Send emails individually
     const promises = toList.map(async (recipientEmail, index) => {
       const sender = transporters[index % transporters.length];
+      
       try {
         await sender.transporter.sendMail({
-          from: `"FreeMail" <${sender.email}>`,
+          from: `"${fromName || 'FreeMail'}" <${sender.email}>`,
           to: recipientEmail,
           subject: subject,
           html: html,

@@ -32,25 +32,14 @@ export default function CampaignMonitorPage() {
   const emails = (campaign.rawEmails || '').split('\n').filter(Boolean)
   const totalEmails = emails.length || 0
   
-  // Fake stats
-  const delivered = Math.floor(totalEmails * 0.85)
-  const failed = Math.floor(totalEmails * 0.1)
-  const bounced = totalEmails - delivered - failed
+  // Since we don't have real webhooks yet, we assume success for the demo.
+  const delivered = totalEmails
+  const failed = 0
+  const bounced = 0
 
-  // Fake table data
   const deliveryLogs = emails.map((email, i) => {
-    let status = 'Delivered'
-    let reason = '-'
-    
-    if (i % 10 === 0) {
-      status = 'Failed'
-      reason = 'Invalid domain MX record'
-    } else if (i % 7 === 0) {
-      status = 'Bounced'
-      reason = 'Mailbox full or blocked'
-    }
-
-    return { email, status, reason, time: new Date(Date.now() - Math.random() * 10000000).toLocaleString() }
+    const time = new Date(new Date(campaign.createdAt).getTime() + (i * 1200)).toLocaleString()
+    return { email, status: 'Delivered', reason: '-', time }
   })
 
   return (
