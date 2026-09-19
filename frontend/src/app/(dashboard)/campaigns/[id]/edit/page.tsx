@@ -144,7 +144,7 @@ export default function CampaignEditWizard() {
           to: emails,
           subject: subjectLine || 'FreeMail Campaign',
           html: finalHtml,
-          fromName: companyName || campaign.name || 'FreeMail',
+          fromName: companyName || campaign?.name || 'FreeMail',
           customSmtp
         })
       });
