@@ -154,7 +154,11 @@ export default function LandingPage() {
         <div className="text-sm font-medium text-slate-500 flex flex-col md:flex-row items-center gap-2 md:gap-6">
           <span>© 2026 FreeMail Inc. All rights reserved.</span>
           <span className="hidden md:inline text-slate-300">|</span>
-          <span>Powered by <a href="https://x010.tech" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors">x010.tech</a></span>
+          <div className="flex items-center gap-3">
+            <span>Powered by <a href="https://x010.tech" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors">x010.tech</a></span>
+            <span className="text-slate-300">•</span>
+            <a href="https://sportyxi.com/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-600 transition-colors">SportyXi</a>
+          </div>
         </div>
       </footer>
 
